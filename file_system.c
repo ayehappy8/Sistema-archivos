@@ -163,6 +163,7 @@ int main() {
         printf("--------------------Manejo de archivos---------------------\n");
         printf("\n");        
         printf("------------------Manejo de directorios------------------\n");
+        printf("3. Mostrar directorios\n");
         printf("4. Cambiar de directorio\n");
         printf("5. Crear nuevo directorio\n");
         printf("6. Eliminar directorio actual\n");
@@ -174,6 +175,13 @@ int main() {
         getchar();  // Limpiar el buffer de entrada
 
         switch (opcion) {
+            case 3:
+                printf("\n");
+                printf("-------------------------------\n");
+                mostrarDirectorios(directorioRoot.ruta);
+                printf("-------------------------------\n");
+                printf("\n");
+                break;
             case 4:
                 cambiarDirectorio(&directorioRoot);
                 break;
