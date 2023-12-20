@@ -13,47 +13,36 @@ struct Archivo {
 struct DirectorioRoot {
     char ruta[256];
 };
-/*
-void crearArchivoYGuardarEnDisco(struct Archivo *archivo, const char *nombreArchivo, const char *contenido) {
-    snprintf(archivo->ruta, sizeof(archivo->ruta), "%s/%s", "root", nombreArchivo);
-    strcpy(archivo->contenido, contenido);
 
-    FILE *file = fopen(archivo->ruta, "w");
-    if (file != NULL) {
-        fputs(archivo->contenido, file);
-        fclose(file);
-        printf("Archivo creado y guardado en disco en la ruta: %s\n", archivo->ruta);
-    } else {
-        fprintf(stderr, "Error al abrir el archivo '%s' para escritura.\n", archivo->ruta);
-    }
-}
-
-void cargarArchivoDesdeDisco(struct Archivo *archivo) {
-    FILE *file = fopen(archivo->ruta, "r");
-    if (file != NULL) {
-        fgets(archivo->contenido, sizeof(archivo->contenido), file);
-        fclose(file);
-        printf("Contenido del archivo cargado desde disco: %s\n", archivo->contenido);
-    } else {
-        fprintf(stderr, "Error al abrir el archivo '%s' para lectura.\n", archivo->ruta);
-    }
-}
-
-void eliminarArchivo(const char *ruta) {
-    if (remove(ruta) != 0) {
-        fprintf(stderr, "Error al eliminar el archivo '%s'.\n", ruta);
-    } else {
-        printf("Archivo eliminado.\n");
-    }
-}
-*/
-void mostrarDirectoriosDisponibles(const char *ruta) {
-
+void mostrarArchivosEnDirectorio(const char *ruta, const char *extension) {
+    printf("Archivos disponibles en '%s' con extensión '%s':\n", ruta, extension);
 
     DIR *dir;
     struct dirent *ent;
 
-    printf("esto es para ejemplificar %s\n", ent->d_name);
+    if ((dir = opendir(ruta)) != NULL) {
+        int i = 1;
+        while ((ent = readdir(dir)) != NULL) {
+            if (ent->d_type == DT_REG) {
+                // Verificar si el archivo tiene la extensión deseada
+                const char *dot = strrchr(ent->d_name, '.');
+                if (dot && strcmp(dot, extension) == 0) {
+                    printf("%d. [Archivo] %s\n", i++, ent->d_name);
+                }
+            }
+        }
+        closedir(dir);
+    } else {
+        perror("Error al abrir el directorio");
+    }
+}
+
+void mostrarDirectoriosDisponibles(const char *ruta) {
+    printf("Directorios disponibles en '%s':\n", ruta);
+
+    DIR *dir;
+    struct dirent *ent;
+
     if ((dir = opendir(ruta)) != NULL) {
         int i = 1;
         while ((ent = readdir(dir)) != NULL) {
@@ -128,7 +117,6 @@ void cambiarDirectorio(struct DirectorioRoot *directorioRoot) {
     }
 }
 
-
 int main() {
     // Crear el directorio "root" si no existe
     // La carpeta se ubica en el output
@@ -146,48 +134,28 @@ int main() {
     int opcion;
     do {
         printf("------ Menu ------\n");
-       // printf("1. Crear archivo y guardar en disco\n");
-       // printf("2. Cargar archivo desde disco\n");
-       // printf("3. Eliminar archivo\n");
-        printf("4. Cambiar directorio\n");
-        printf("5. Salir\n");
+        printf("1. Crear archivo y guardar en disco\n");
+        printf("2. Cargar archivo desde disco\n");
+        printf("3. Eliminar archivo\n");
+        printf("4. Mostrar archivos de texto\n");
+        printf("5. Cambiar directorio\n");
+        printf("6. Salir\n");
         printf("-------------------\n");
         printf("Seleccione una opción: ");
         scanf("%d", &opcion);
         getchar();  // Limpiar el buffer de entrada
 
         switch (opcion) {
-            /*
-            case 1:
-                printf("Ingrese el nombre del archivo: ");
-                char nombreArchivo[100];
-                scanf("%s", nombreArchivo);
-                printf("Ingrese el contenido del archivo: ");
-                scanf("%s", miArchivo.contenido);
-                crearArchivoYGuardarEnDisco(&miArchivo, nombreArchivo, miArchivo.contenido);
-                break;
 
-            case 2:
-                printf("Ingrese el nombre del archivo a cargar: ");
-                char nombreArchivoCargar[100];
-                scanf("%s", nombreArchivoCargar);
-                snprintf(miArchivo.ruta, sizeof(miArchivo.ruta), "%s/%s", "root", nombreArchivoCargar);
-                cargarArchivoDesdeDisco(&miArchivo);
-                break;
-
-            case 3:
-                printf("Ingrese el nombre del archivo a eliminar: ");
-                char nombreArchivoEliminar[100];
-                scanf("%s", nombreArchivoEliminar);
-                snprintf(miArchivo.ruta, sizeof(miArchivo.ruta), "%s/%s", "root", nombreArchivoEliminar);
-                eliminarArchivo(miArchivo.ruta);
-                break;
-*/
             case 4:
-                cambiarDirectorio(&directorioRoot);
+                mostrarArchivosEnDirectorio(directorioRoot.ruta, "txt");
                 break;
 
             case 5:
+                cambiarDirectorio(&directorioRoot);
+                break;
+
+            case 6:
                 printf("Saliendo del programa.\n");
                 break;
 
