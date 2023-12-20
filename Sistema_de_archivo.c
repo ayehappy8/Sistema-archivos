@@ -93,7 +93,7 @@ void cambiarDirectorio(struct DirectorioRoot *directorioRoot) {
         }
     }
 }
-// Manejo de directorios
+
 void eliminarDirectorioActual(struct DirectorioRoot *directorioRoot) {
     char directorioActual[256];
     if (getcwd(directorioActual, sizeof(directorioActual)) != NULL) {
@@ -138,7 +138,171 @@ void crearNuevoDirectorio(struct DirectorioRoot *directorioRoot) {
     }
 }
 // Manejo de directorios
+// Manejo de archivos
+void crearArchivo(struct Archivo *archivo, const char *nombreArchivo,struct DirectorioRoot *directorioRoot){
+    snprintf(archivo->ruta, sizeof(archivo->ruta), "%s/%s", directorioRoot->ruta, nombreArchivo);
+    //strcpy(archivo->contenido, contenido);
 
+    FILE *file = fopen(archivo->ruta, "w");
+    if (file != NULL) {
+        //fputs(archivo->contenido, file);
+        fclose(file);
+        printf("Archivo creado y guardado en disco en la ruta: %s\n", archivo->ruta);
+    } else {
+        fprintf(stderr, "Error al abrir el archivo '%s' para escritura.\n", archivo->ruta);
+    }
+}
+
+void escribirArchivo(struct DirectorioRoot *directorioRoot, const char *extension){
+    char ruta[256];
+    mostrarArchivosEnDirectorio(directorioRoot->ruta, extension);
+    int opcion;
+    printf("Seleccione el archivo segun su numero:\n");
+    scanf("%d", &opcion);
+    
+    getchar();
+    
+
+    DIR *dir;
+    struct dirent *ent;
+
+    if ((dir = opendir(directorioRoot->ruta)) != NULL) {
+        int i = 1;
+        while ((ent = readdir(dir)) != NULL) {
+            if (ent->d_type == DT_REG) {
+                // Verificar si el archivo tiene la extensión deseada
+                const char *dot = strrchr(ent->d_name, '.');
+                if (dot && strcmp(dot, extension) == 0) {
+                    snprintf(ruta, sizeof(ruta), "%s/%s", directorioRoot->ruta, ent->d_name);
+                    if (i == opcion)
+                    {
+                        printf("Archivo Seleccionado: %s\n", ent->d_name);
+                        char contenido[1000];
+                        printf("Ingrese el texto que dese escribir:\n");
+                        scanf("%s", contenido);
+                        FILE *file = fopen(ruta, "w");
+                        if (file != NULL) {
+                            fputs(contenido, file);
+                            fclose(file);
+                        } else {
+                            fprintf(stderr, "Error al abrir el archivo '%s' para escritura.\n", ruta);
+                        }
+                    }
+                    i++;
+                }
+            }
+        }
+        closedir(dir);
+    } else {
+        perror("Error al abrir el directorio");
+    }
+}
+
+void leerArchivo(struct DirectorioRoot *directorioRoot, const char *extension){
+    char ruta[256];
+    mostrarArchivosEnDirectorio(directorioRoot->ruta, extension);
+    int opcion;
+    printf("Seleccione el archivo segun su numero:\n");
+    scanf("%d", &opcion);
+    
+    getchar();
+    
+
+    DIR *dir;
+    struct dirent *ent;
+
+    if ((dir = opendir(directorioRoot->ruta)) != NULL) {
+        int i = 1;
+        while ((ent = readdir(dir)) != NULL) {
+            if (ent->d_type == DT_REG) {
+                // Verificar si el archivo tiene la extensión deseada
+                const char *dot = strrchr(ent->d_name, '.');
+                if (dot && strcmp(dot, extension) == 0) {
+                    snprintf(ruta, sizeof(ruta), "%s/%s", directorioRoot->ruta, ent->d_name);
+                    if (i == opcion)
+                    {
+                        printf("Archivo Seleccionado: %s\n", ent->d_name);
+                        char contenido[1000];
+                        FILE *file = fopen(ruta, "r");
+                        if (file != NULL) {
+                            fgets(contenido, sizeof(contenido), file);
+                            fclose(file);
+                        } else {
+                            fprintf(stderr, "Error al abrir el archivo '%s' para escritura.\n", ruta);
+                        }
+                        printf("El contenido del archivo es: \n%s\n", contenido);
+                    }
+                    i++;
+                }
+            }
+        }
+        closedir(dir);
+    } else {
+        perror("Error al abrir el directorio\n");
+    }
+}
+
+void eliminarArchivo(struct DirectorioRoot *directorioRoot, const char *extension){
+    char ruta[256];
+    mostrarArchivosEnDirectorio(directorioRoot->ruta, extension);
+    int opcion;
+    printf("Seleccione el archivo segun su numero:\n");
+    scanf("%d", &opcion);
+    getchar();
+    
+
+    DIR *dir;
+    struct dirent *ent;
+
+    if ((dir = opendir(directorioRoot->ruta)) != NULL) {
+        int i = 1;
+        while ((ent = readdir(dir)) != NULL) {
+            if (ent->d_type == DT_REG) {
+                // Verificar si el archivo tiene la extensión deseada
+                const char *dot = strrchr(ent->d_name, '.');
+                if (dot && strcmp(dot, extension) == 0) {
+                    snprintf(ruta, sizeof(ruta), "%s/%s", directorioRoot->ruta, ent->d_name);
+                    if (i == opcion)
+                    {
+                        if (remove(ruta)==0)
+                        {
+                            printf("El archivo fue correctamente eliminado\n");
+                        }else
+                            printf("El archivo no se pudo eliminar\n");
+                    }
+                    i++;
+                }
+            }
+        }
+        closedir(dir);
+    } else {
+        perror("Error al abrir el directorio");
+    }
+}
+
+void mostrarArchivosEnDirectorio(const char *ruta, const char *extension) {
+    printf("Archivos disponibles en '%s' con extensión '%s':\n", ruta, extension);
+
+    DIR *dir;
+    struct dirent *ent;
+
+    if ((dir = opendir(ruta)) != NULL) {
+        int i = 1;
+        while ((ent = readdir(dir)) != NULL) {
+            if (ent->d_type == DT_REG) {
+                // Verificar si el archivo tiene la extensión deseada
+                const char *dot = strrchr(ent->d_name, '.');
+                if (dot && strcmp(dot, extension) == 0) {
+                    printf("%d. %s\n", i++, ent->d_name);
+                }
+            }
+        }
+        closedir(dir);
+    } else {
+        perror("Error al abrir el directorio\n");
+    }
+}
+// Manejo de archivos
 
 int main() {
     // Especifica la ruta absoluta al directorio "root"
@@ -148,50 +312,85 @@ int main() {
         fprintf(stderr, "Error al crear el directorio '%s'\n", rootDirectorio);
         return 1;
     }
-    //incializacion de estructurassnprintf
+    //incializacion de estructuras
     struct DirectorioRoot directorioRoot;
     strcpy(directorioRoot.ruta, rootDirectorio);
 
-    //incializacion de estructurassnprintf
+    struct Archivo miArchivo;
+    //incializacion de estructuras
 
 
     int opcion;
     do {
+        printf("\n");        
+        printf("\n");        
         printf("===================Sistema de archivos====================\n");
+        printf("Para cancelar una acción escriba -1\n");
         printf("--------------------Manejo de archivos---------------------\n");
-        //printf("1. Crear archivo y guardar en disco\n");
+        printf("1. Crear archivo\n");
+        printf("2. Escribir en un archivo\n");
+        printf("3. Leer un archivo\n");
+        printf("4. Eliminar archivo\n");
+        printf("5. Mostrar archivos de texto disponible\n");
         printf("--------------------Manejo de archivos---------------------\n");
         printf("\n");        
         printf("------------------Manejo de directorios------------------\n");
-        printf("3. Mostrar directorios\n");
-        printf("4. Cambiar de directorio\n");
-        printf("5. Crear nuevo directorio\n");
-        printf("6. Eliminar directorio actual\n");
+        printf("6. Mostrar directorios\n");
+        printf("7. Cambiar de directorio\n");
+        printf("8. Crear nuevo directorio\n");
+        printf("9. Eliminar directorio actual\n");
         printf("------------------Manejo de directorios------------------\n");
-        printf("7. Salir\n");
+        printf("0. Salir\n");
         printf("===================Sistema de archivos====================\n");
         printf("Seleccione una opción: ");
         scanf("%d", &opcion);
         getchar();  // Limpiar el buffer de entrada
 
         switch (opcion) {
+            case 1:
+                printf("Ingrese nombre del Archivo\n");
+                char nombreArchivo[100];
+                char exten[5] = ".txt";
+                scanf("%s", nombreArchivo);
+                strcat(nombreArchivo, exten);
+                crearArchivo(&miArchivo, nombreArchivo, &directorioRoot);   
+                break;
+
+            case 2:
+                escribirArchivo(&directorioRoot, ".txt");
+
+                break;
+
             case 3:
+                leerArchivo(&directorioRoot, ".txt");
+
+                break;
+            
+            case 4:
+                eliminarArchivo(&directorioRoot, ".txt");
+
+                break;
+
+            case 5:
+                mostrarArchivosEnDirectorio(directorioRoot.ruta, ".txt");
+                break;
+
+            case 6:
                 printf("\n");
                 printf("-------------------------------\n");
                 mostrarDirectorios(directorioRoot.ruta);
-                printf("-------------------------------\n");
-                printf("\n");
-                break;
-            case 4:
-                cambiarDirectorio(&directorioRoot);
-                break;
-            case 5:
-                crearNuevoDirectorio(&directorioRoot);
-                break;
-            case 6:
-                eliminarDirectorioActual(&directorioRoot);
+                printf("-------------------------------\n");        
                 break;
             case 7:
+                cambiarDirectorio(&directorioRoot);
+                break;
+            case 8:
+                crearNuevoDirectorio(&directorioRoot);
+                break;
+            case 9:
+                eliminarDirectorioActual(&directorioRoot);
+                break;
+            case 0:
                 printf("Saliendo del programa.\n");
                 break;
                 
@@ -200,7 +399,7 @@ int main() {
                 printf("Opción no válida. Intente de nuevo.\n");
         }
 
-    } while (opcion != 7);
+    } while (opcion != 0);
 
     return 0;
 }
