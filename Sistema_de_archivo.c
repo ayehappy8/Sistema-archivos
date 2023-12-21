@@ -18,16 +18,16 @@ void mostrarDirectorios(const char *ruta) {
     printf("Directorios disponibles en '%s':\n", ruta);
 
     DIR *directorio;
-    struct dirent *entrada;
+    struct dirent *entrada; //Declaracion y inicializacion de la cabezera dirent
         
-    if ((directorio = opendir(ruta)) != NULL) {
+    if ((directorio = opendir(ruta)) != NULL) { //Abrir directorio y comprobar existencia
         int i = 1;
-        while ((entrada = readdir(directorio)) != NULL) {
-            if (entrada->d_type == DT_DIR && strcmp(entrada->d_name, ".") != 0 && strcmp(entrada->d_name, "..") != 0) {
+        while ((entrada = readdir(directorio)) != NULL) {//Lectura de los contenidos del directorio
+            if (entrada->d_type == DT_DIR && strcmp(entrada->d_name, ".") != 0 && strcmp(entrada->d_name, "..") != 0) {//Comprobacion que es un directorio
                 printf("%d) %s\n", i++, entrada->d_name);
             }
         }
-        closedir(directorio);
+        closedir(directorio);//Cerrar el directorio
     } else {
         perror("Error al entrar al directorio");
     }
@@ -37,7 +37,7 @@ void redireccion(struct DirectorioRoot *directorioRoot, const char *nombreDirect
     char nuevaRuta[256];
     snprintf(nuevaRuta, sizeof(nuevaRuta), "%s/%s", directorioRoot->ruta, nombreDirectorio);
 
-    if (chdir(nuevaRuta) == 0) {
+    if (chdir(nuevaRuta) == 0) {//aplica el cambio de ruta
         if (getcwd(directorioRoot->ruta, sizeof(directorioRoot->ruta)) != NULL) {
             printf("Cambiado a: %s\n", directorioRoot->ruta);
         } else {
@@ -54,7 +54,7 @@ void cambiarDirectorio(struct DirectorioRoot *directorioRoot) {
     int opcion;
     printf("Seleccione un directorio por su número (0 para retroceder en un directorio): ");
     scanf("%d", &opcion);
-    getchar();  // Limpiar el buffer de entrada
+    getchar();  // Limpiar el buffer de entrada 
 
     if (opcion == 0) {
         // Evitar retroceder más allá de la carpeta "root"
